@@ -91,12 +91,21 @@ static PyObject *trieTree_treeToList(trieTreeObject *self, PyObject *args)
     return list;
 }
 
+static PyObject *trieTree_countAllWithPrefix(trieTreeObject *self, PyObject *args)
+{
+    char *word;
+    if (!PyArg_ParseTuple(args, "s", &word))
+        return Py_BuildValue("i", 0);
+    return Py_BuildValue("i", count_all_with_prefix(self->trie_tree, word));
+}
+
 static PyMethodDef trieTree_methods[] = {
     {"insert", (PyCFunction)trieTree_insert, METH_VARARGS, "insert word to trie and return number"},
     {"insertWithValue", (PyCFunction)trieTree_insertWithValue, METH_VARARGS, "insert word to trie with value and return number"},
     {"inTree", (PyCFunction)trieTree_inTree, METH_VARARGS, "returns number of occurrences"},
     {"printTree", (PyCFunction)trieTree_printTree, METH_NOARGS, "prints trie tree"},
     {"treeToList", (PyCFunction)trieTree_treeToList, METH_NOARGS, "returns list of tree content"},
+    {"countAllWithPrefix", (PyCFunction)trieTree_countAllWithPrefix, METH_VARARGS, "returns number of words with specified prefix"},
     {NULL}};
 
 static PyTypeObject trieTreeType = {

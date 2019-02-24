@@ -27,3 +27,8 @@ t3.printTree()
 print(t.treeToList())
 # print(t1.treeToList())
 # print(t3.treeToList())
+
+print(t.countAllWithPrefix('tes'))
+print(t.countAllWithPrefix('k'))
+print(t.countAllWithPrefix('ka'))
+print(t.countAllWithPrefix('a'))

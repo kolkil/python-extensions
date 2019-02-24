@@ -30,4 +30,5 @@ int print_tree_words_count(tree *);
 int in_tree(tree *, char[STANDARD_BUFFER_SIZE]);
 tree *get_tree();
 int free_tree(tree *);
+int count_all_with_prefix(tree *, char[STANDARD_BUFFER_SIZE]);
 void tree_to_array(tree *, item *);

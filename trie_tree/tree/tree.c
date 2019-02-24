@@ -402,3 +402,59 @@ void tree_to_array(tree *base, item *array)
         }
     return;
 }
+
+void count_children(dict_node *node, int *w_f, int *counter)
+{
+    if (node == NULL)
+    {
+        return;
+    }
+    int not_nulls = 0;
+    for (int i = 0, n_printed = 0; i < ALPHABET_LEN; ++i)
+    {
+        if (node->children[i] != NULL)
+        {
+            if (*w_f || node->ends > 0)
+            {
+                if (node->ends > 0 && !n_printed)
+                {
+                    ++(*counter);
+                    n_printed = 1;
+                }
+                *w_f = 0;
+            }
+            ++not_nulls;
+            count_children(node->children[i], w_f, counter);
+        }
+    }
+    if (not_nulls == 0)
+    {
+        *w_f = 1;
+        ++(*counter);
+    }
+}
+
+int count_all_with_prefix(tree *base, char input[STANDARD_BUFFER_SIZE])
+{
+    char word[STANDARD_BUFFER_SIZE] = {0};
+    match_letters(input, word);
+    uint32_t len = strlen(word),
+             count = 0;
+    if (len <= 0)
+        return 0;
+    int index = (int)word[0] - 'a',
+        wf = 0;
+    if (base->roots[index] == NULL)
+        return 0;
+    dict_node *current = base->roots[index];
+    for (uint32_t i = 1; i < len; ++i)
+    {
+        index = (int)word[i] - 'a';
+        if (current->children[index] == NULL)
+            return 0;
+        current = current->children[index];
+    }
+    count = current->ends;
+    count_children(current, &wf, (int *)&count);
+    return count;
+}
