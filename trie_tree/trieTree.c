@@ -1,6 +1,7 @@
 #ifdef DEBUG
 #include <stdio.h>
 #endif
+#include <string.h>
 #include <Python.h>
 #include "structmember.h"
 #include "tree/tree.h"
@@ -37,11 +38,11 @@ static int trieTree_init(trieTreeObject *self)
 static PyMemberDef trieTree_members[] = {
     {NULL}};
 
-static PyObject *trieTree_insertWord(trieTreeObject *self, PyObject *word)
+static PyObject *trieTree_insert(trieTreeObject *self, PyObject *word)
 {
     char *tmp;
     if (!PyArg_ParseTuple(word, "s", &tmp))
-        return NULL;
+        return Py_BuildValue("i", 0);
     int counter = insert_word(self->trie_tree, tmp);
 #ifdef DEBUG
     printf("c = %d, tmp = %s, self->trie_tree = %s\n", counter, tmp, self->trie_tree == NULL ? "NULL" : "Tree");
@@ -49,8 +50,53 @@ static PyObject *trieTree_insertWord(trieTreeObject *self, PyObject *word)
     return Py_BuildValue("i", counter);
 }
 
+static PyObject *trieTree_insertWithValue(trieTreeObject *self, PyObject *args)
+{
+    char *tmp;
+    int value;
+    if (!PyArg_ParseTuple(args, "si", &tmp, &value))
+        return Py_BuildValue("i", 0);
+    int counter = insert_word_with_value(self->trie_tree, tmp, value);
+    return Py_BuildValue("i", counter);
+}
+
+static PyObject *trieTree_inTree(trieTreeObject *self, PyObject *args)
+{
+    char *word;
+    if (!PyArg_ParseTuple(args, "s", &word))
+        return Py_BuildValue("i", 0);
+    int counter = in_tree(self->trie_tree, word);
+    return Py_BuildValue("i", counter);
+}
+
+static PyObject *trieTree_printTree(trieTreeObject *self, PyObject *args)
+{
+    print_tree_words_count(self->trie_tree);
+    return Py_BuildValue("i", 0);
+}
+
+static PyObject *trieTree_treeToList(trieTreeObject *self, PyObject *args)
+{
+    item *array = malloc(sizeof(item) * self->trie_tree->words);
+    tree_to_array(self->trie_tree, array);
+    int len = self->trie_tree->words;
+    PyObject *list = PyList_New(len);
+    for (int i = 0; i < len; ++i)
+    {
+        PyObject *pair = Py_BuildValue("si", array[i].word, array[i].count);
+        PyList_SetItem(list, i, pair);
+        free(array[i].word);
+    }
+    free(array);
+    return list;
+}
+
 static PyMethodDef trieTree_methods[] = {
-    {"insertWord", (PyCFunction)trieTree_insertWord, METH_VARARGS, "insert word to trie and return number"},
+    {"insert", (PyCFunction)trieTree_insert, METH_VARARGS, "insert word to trie and return number"},
+    {"insertWithValue", (PyCFunction)trieTree_insertWithValue, METH_VARARGS, "insert word to trie with value and return number"},
+    {"inTree", (PyCFunction)trieTree_inTree, METH_VARARGS, "returns number of occurrences"},
+    {"printTree", (PyCFunction)trieTree_printTree, METH_NOARGS, "prints trie tree"},
+    {"treeToList", (PyCFunction)trieTree_treeToList, METH_NOARGS, "returns list of tree content"},
     {NULL}};
 
 static PyTypeObject trieTreeType = {

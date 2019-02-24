@@ -338,3 +338,67 @@ int free_tree(tree *base)
     free(base);
     return frees;
 }
+
+void insert_tree_word_to_array(dict_node *node, char offset[STANDARD_BUFFER_SIZE], int *w_f, item *array, int *index)
+{
+    if (node == NULL)
+    {
+        return;
+    }
+    int not_nulls = 0;
+    for (int i = 0, n_printed = 0; i < ALPHABET_LEN; ++i)
+    {
+        if (node->children[i] != NULL)
+        {
+            if (*w_f || node->ends > 0)
+            {
+                if (node->ends > 0 && !n_printed)
+                {
+                    int len = strlen(offset);
+                    array[(*index)].count = node->ends;
+                    array[(*index)].word = malloc(sizeof(len) + 1);
+                    for (int c = 0; c < len; ++c)
+                        array[(*index)].word[c] = offset[c];
+                    array[*index].word[len] = 0;
+                    ++(*index);
+                    n_printed = 1;
+                }
+                *w_f = 0;
+            }
+            ++not_nulls;
+            int len = strlen(offset);
+            if (len < STANDARD_BUFFER_SIZE - 1)
+                offset[len] = (char)('a' + i);
+            insert_tree_word_to_array(node->children[i], offset, w_f, array, index);
+            if (len < STANDARD_BUFFER_SIZE - 1)
+                offset[len] = (char)0;
+        }
+    }
+    if (not_nulls == 0)
+    {
+        *w_f = 1;
+        int len = strlen(offset);
+        array[(*index)].count = node->ends;
+        array[(*index)].word = malloc(sizeof(len) + 1);
+        for (int c = 0; c < len; ++c)
+            array[(*index)].word[c] = offset[c];
+        array[*index].word[len] = 0;
+        ++(*index);
+        offset[len - 1] = (char)0;
+        offset[len] = (char)0;
+    }
+}
+
+void tree_to_array(tree *base, item *array)
+{
+    char offset[STANDARD_BUFFER_SIZE] = {0};
+    int index = 0;
+    for (int i = 0; i < ALPHABET_LEN; ++i)
+        if (base->roots[i] != NULL)
+        {
+            int w_f = 0;
+            offset[0] = (char)('a' + i);
+            insert_tree_word_to_array(base->roots[i], offset, &w_f, array, &index);
+        }
+    return;
+}
